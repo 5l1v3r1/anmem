@@ -14,6 +14,7 @@ static bool _add_allocator(anmem_t * mem,
                            uint64_t type);
 static uint64_t _sum_regions(anmem_config_t * config);
 static uint64_t _next_analloc(anmem_t * mem, uint64_t start, uint64_t * len);
+static bool _region_is_taken(anmem_t * mem, uint64_t start, uint64_t len);
 
 bool anmem_configure(anmem_config_t * config,
                      anmem_t * mem,
@@ -107,12 +108,12 @@ static bool _create_controllable(anmem_config_t * config,
                                  anmem_t * mem,
                                  uint64_t pagesExp,
                                  uint64_t pageSkip) {
-  uint64_t i, curPage = 0;
-  void * structs = config->structs;
-  
   uint64_t grabSize = 1 << pagesExp;
   uint64_t sizeRemaining = grabSize;
+  
   while (grabSize >= 0x4 && sizeRemaining > 0) {
+    uint64_t i, curPage = 0;
+    void * structs = config->structs;
     for (i = 0; i < config->structCount && sizeRemaining > 0; i++) {
       // read the structure
       uint64_t fullSize = *((uint64_t *)(structs + config->sizeOffset));
@@ -137,27 +138,31 @@ static bool _create_controllable(anmem_config_t * config,
         // make sure there is a possibility of finding a region
         if (lowerBound >= upperBound) break;
         if (upperBound - lowerBound < grabSize) break;
+        
         // look for an aligned address between lowerBound and upperBound
         if (lowerBound % grabSize) {
           uint64_t nextBound = lowerBound + grabSize
             - (lowerBound % grabSize);
           if (nextBound + grabSize > upperBound) break;
           
-          // we found a region for our grab size
-          if (!_add_allocator(mem, nextBound, grabSize, 1)) {
-            return false;
+          if (!_region_is_taken(mem, nextBound, grabSize)) {
+            if (!_add_allocator(mem, nextBound, grabSize, 1)) {
+              return false;
+            }
+            sizeRemaining -= grabSize;
           }
           
           lowerBound = nextBound + grabSize;
-          sizeRemaining -= grabSize;
         } else {
           // we found a region for our grab size
-          if (!_add_allocator(mem, lowerBound, grabSize, 1)) {
-            return false;
+          if (!_region_is_taken(mem, lowerBound, grabSize)) {
+            if (!_add_allocator(mem, lowerBound, grabSize, 1)) {
+              return false;
+            }
+            sizeRemaining -= grabSize;
           }
           
           lowerBound += grabSize;
-          sizeRemaining -= grabSize;
         }
       }
     }
@@ -201,4 +206,16 @@ static uint64_t _next_analloc(anmem_t * mem, uint64_t start, uint64_t * len) {
     }
   }
   return firstPlace;
+}
+
+static bool _region_is_taken(anmem_t * mem, uint64_t start, uint64_t len) {
+  // see if any allocators overlap with the specified range
+  uint64_t i;
+  for (i = 0; i < mem->count; i++) {
+    anmem_section_t seg = mem->allocators[i];
+    if (seg.start >= start + len) continue;
+    if (seg.start + seg.len <= start) continue;
+    return true;
+  }
+  return false;
 }
