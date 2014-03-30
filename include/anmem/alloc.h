@@ -1,3 +1,6 @@
+#ifndef __ANMEM_ALLOC_H__
+#define __ANMEM_ALLOC_H__
+
 #include "types.h"
 
 /**
@@ -22,3 +25,5 @@ void * anmem_alloc_page();
  * Free a page of memory which was allocated with anmem_alloc_page().
  */
 void anmem_free_page(anmem_t * mem, void * page);
+
+#endif

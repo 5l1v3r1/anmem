@@ -1,3 +1,6 @@
+#ifndef __ANMEM_CONFIG_H__
+#define __ANMEM_CONFIG_H__
+
 #include "types.h"
 
 /**
@@ -33,3 +36,5 @@ bool anmem_configure(anmem_config_t * config,
  * where n is the value you passed for `maxControllable` to anmem_configure.
  */
 uint64_t anmem_analloc_count(anmem_t * mem);
+
+#endif

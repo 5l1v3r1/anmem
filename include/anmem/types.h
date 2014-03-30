@@ -1,3 +1,6 @@
+#ifndef __ANMEM_TYPES_H__
+#define __ANMEM_TYPES_H__
+
 #include <anpages.h>
 #include <analloc.h>
 #include <anmem_consts.h> // int types, etc.
@@ -48,3 +51,5 @@ typedef struct {
 } __attribute__((packed)) anmem_config_t;
 
 typedef void (* anmem_free_t)(void * userInfo, void * ptr);
+
+#endif
