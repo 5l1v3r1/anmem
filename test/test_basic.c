@@ -28,12 +28,13 @@ void test_initialize() {
   posix_memalign(&buffer, 0x20000, 0x20000);
   
   uint64_t firstPage = ((uint64_t)buffer) >> 12;
-  uint64_t sizes[3] = {firstPage, 0x1, 0x1f};
+  uint64_t sizes[] = {firstPage, 0, 0x1, firstPage, 0x1f, firstPage + 1};
   
   anmem_config_t config;
   config.structs = sizes;
   config.sizeOffset = 0;
-  config.structSize = 8;
+  config.physPageOffset = 8;
+  config.structSize = 0x10;
   config.structCount = 3;
   
   mem.allocators = sections;

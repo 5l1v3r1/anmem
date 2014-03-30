@@ -117,19 +117,22 @@ static bool _create_controllable(anmem_config_t * config,
     for (i = 0; i < config->structCount && sizeRemaining > 0; i++) {
       // read the structure
       uint64_t fullSize = *((uint64_t *)(structs + config->sizeOffset));
+      uint64_t physPage = *((uint64_t *)(structs + config->physPageOffset));
       structs += config->structSize;
+      
       // calculate the available bounds
       uint64_t lowerBound = curPage, upperBound = curPage + fullSize;
 #ifndef IGNORE_4GB_RULE
-      if (upperBound > 0x100000) {
-        upperBound = 0x100000;
+      if (upperBound + (physPage - lowerBound) > 0x100000) {
+        upperBound = 0x100000 + (lowerBound - physPage);
       }
 #endif
       if (lowerBound < pageSkip) {
+        physPage += pageSkip - lowerBound;
         lowerBound = pageSkip;
       }
 #ifndef IGNORE_4GB_RULE
-      if (lowerBound >= 0x100000) break;
+      if (physPage >= 0x100000) break;
 #endif
       
       curPage += fullSize;
@@ -140,9 +143,9 @@ static bool _create_controllable(anmem_config_t * config,
         if (upperBound - lowerBound < grabSize) break;
         
         // look for an aligned address between lowerBound and upperBound
-        if (lowerBound % grabSize) {
+        if (physPage % grabSize) {
           uint64_t nextBound = lowerBound + grabSize
-            - (lowerBound % grabSize);
+            - (physPage % grabSize);
           if (nextBound + grabSize > upperBound) break;
           
           if (!_region_is_taken(mem, nextBound, grabSize)) {
@@ -152,6 +155,7 @@ static bool _create_controllable(anmem_config_t * config,
             sizeRemaining -= grabSize;
           }
           
+          physPage = nextBound + grabSize + (physPage - lowerBound);
           lowerBound = nextBound + grabSize;
         } else {
           // we found a region for our grab size
@@ -162,6 +166,7 @@ static bool _create_controllable(anmem_config_t * config,
             sizeRemaining -= grabSize;
           }
           
+          physPage += grabSize;
           lowerBound += grabSize;
         }
       }

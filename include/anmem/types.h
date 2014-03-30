@@ -41,11 +41,14 @@ typedef struct {
 /**
  * Represents an array of `structCount` structures, each of size `structSize`.
  * Each struct contains a 64-bit native endian page count at offset
- * `sizeOffset` in the struct. The pointer to the first struct is `structs`.
+ * `sizeOffset` in the struct. Additionally, each structure contains the
+ * `physicalPageOffset` of this range of memory in the physical address space.
+ * The pointer to the first struct is `structs`.
  */
 typedef struct {
   void * structs;
   uint64_t sizeOffset;
+  uint64_t physPageOffset;
   uint64_t structSize;
   uint64_t structCount;
 } __attribute__((packed)) anmem_config_t;
