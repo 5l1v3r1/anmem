@@ -1,5 +1,5 @@
 CFILES = $(wildcard src/*.c)
-override INCLUDES += -I./include -I./libs/analloc/src -I./libs/anpages/src
+override INCLUDES += -I./include -I./libs/analloc/src -I./libs/anpages/src -I./libs/anlock/src
 
 objects: build
 	for file in $(CFILES); do \

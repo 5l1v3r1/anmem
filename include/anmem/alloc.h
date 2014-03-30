@@ -19,7 +19,7 @@ void anmem_free_aligned(anmem_t * mem, void * buffer, uint64_t len);
 /**
  * Allocate a page (aligned) segment of memory from the fastest source.
  */
-void * anmem_alloc_page();
+void * anmem_alloc_page(anmem_t * mem);
 
 /**
  * Free a page of memory which was allocated with anmem_alloc_page().
