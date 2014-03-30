@@ -53,7 +53,7 @@ bool anmem_configure(anmem_config_t * config,
   
   while (startPage + 1 < sum) {
     uint64_t len;
-    uint64_t next = _next_analloc(mem, page, &len);
+    uint64_t next = _next_analloc(mem, startPage, &len);
     if (!(next + 1)) {
       // fill up the rest of the memory
       _add_allocator(mem, startPage, sum - startPage, 0);
@@ -131,7 +131,7 @@ static bool _add_allocator(anmem_t * mem,
                            uint64_t start,
                            uint64_t len,
                            uint64_t type) {
-  if (mem->count == maximum) return false;
+  if (mem->count == mem->maximum) return false;
   mem->allocators[mem->count].type = type;
   mem->allocators[mem->count].start = start;
   mem->allocators[mem->count].len = len;
@@ -141,9 +141,9 @@ static bool _add_allocator(anmem_t * mem,
       return false;
     }
   } else if (type == 1) { // analloc
-    void * buffer = start << 12;
+    void * buffer = (void *)(start << 12);
     analloc_t alloc = &mem->allocators[mem->count].anallocRoot;
-    if (!analloc_with_chunk(alloc, len << 12, 0, 0x1000)) {
+    if (!analloc_with_chunk(alloc, buffer, len << 12, 0, 0x1000)) {
       return false;
     }
   }
@@ -154,7 +154,7 @@ static bool _add_allocator(anmem_t * mem,
 static uint64_t _sum_regions(anmem_config_t * config) {
   uint64_t i, curPage = 0;
   void * structs = config->structs;
-  for (i = 0; i < config->structCount && sizeRemaining > 0; i++) {
+  for (i = 0; i < config->structCount; i++) {
     // read the structure
     uint64_t fullSize = *((uint64_t *)(structs + config->sizeOffset));
     structs += config->structSize;
