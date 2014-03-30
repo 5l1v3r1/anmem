@@ -99,10 +99,14 @@ static bool _create_controllable(anmem_config_t * config,
       uint64_t lowerBound = curPage, upperBound = curPage + fullSize;
       if (upperBound > 0x100000) {
         upperBound = 0x100000;
-      } else if (lowerBound < pageSkip) {
+      }
+      if (lowerBound < pageSkip) {
         lowerBound = pageSkip;
       }
       if (lowerBound >= 0x100000) break;
+      
+      printf("lowerBound = %llx, upperBound = %llx, pageSkip = %llx\n", lowerBound, upperBound, pageSkip);
+      
       curPage += fullSize;
       // while there are pages left to grab, grab available aligned regions
       while (sizeRemaining) {

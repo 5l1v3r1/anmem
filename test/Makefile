@@ -1,7 +1,7 @@
 TESTS=test_basic.c
 OBJECTS=../build/*.o $(wildcard ../libs/*/build/*.o)
 LIBS=anlock analloc anpages
-TEST_HEADERS=-I../include
+TEST_HEADERS=-I../include -I../libs/analloc/src -I../libs/anpages/src -I./include
 
 all: build ../build libs_build
 	for test in $(TESTS); do \
