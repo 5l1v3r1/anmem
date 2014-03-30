@@ -57,6 +57,9 @@ void test_initialize() {
   assert(sections[2].start == 0x10 + firstPage);
   assert(sections[2].len == 0x10);
   
+  result = anmem_init_structures(&mem);
+  assert(result);
+  
   printf(" passed!\n");
 }
 
@@ -82,9 +85,59 @@ void test_alloc_pages() {
 }
 
 void test_alloc_aligned() {
+  printf("testing anmem_alloc_aligned()...");
   
+  uint64_t firstPage = ((uint64_t)buffer) >> 12;
+  
+  void * firstBuff = anmem_alloc_aligned(&mem, 4);
+  assert(firstBuff != NULL);
+  void * nextBuff = anmem_alloc_aligned(&mem, 2);
+  assert(nextBuff != NULL);
+  
+  uint64_t page1 = ((uint64_t)firstBuff) >> 12;
+  assert(page1 == firstPage + 0xc);
+  uint64_t page2 = ((uint64_t)nextBuff) >> 12;
+  assert(page2 == firstPage + 0xa);
+  
+  anmem_free_aligned(&mem, nextBuff, 4);
+  anmem_free_aligned(&mem, firstBuff, 2);
+  firstBuff = anmem_alloc_aligned(&mem, 4);
+  page1 = ((uint64_t)firstBuff) >> 12;
+  assert(page1 == firstPage + 0xc);
+  
+  anmem_free_aligned(&mem, firstBuff, 4);
+  
+  printf(" passed!\n");
 }
 
 void test_alloc_pages_overflow() {
+  printf("testing allocation overflow...");
   
+  uint64_t firstPage = ((uint64_t)buffer) >> 12;
+  
+  // right now, we have all of the single pages allocated, so the next page
+  // we allocate should be from the analloc_t
+  void * buffer = anmem_alloc_page(&mem);
+  uint64_t bufferPage = ((uint64_t)buffer) >> 12;
+  assert(bufferPage == firstPage + 0x9);
+  
+  buffer = anmem_alloc_page(&mem);
+  bufferPage = ((uint64_t)buffer) >> 12;
+  assert(bufferPage == firstPage + 0xa);
+  
+  anmem_free_page(&mem, (void *)((firstPage + 1) << 12));
+  void * another = anmem_alloc_page(&mem);
+  assert(another == (void *)((firstPage + 1) << 12));
+  
+  // there should be 5 pages left
+  uint64_t i;
+  for (i = 0; i < 5; i++) {
+    buffer = anmem_alloc_page(&mem);
+    bufferPage = ((uint64_t)buffer) >> 12;
+    assert(bufferPage == firstPage + 0xb + i);
+  }
+  
+  assert(anmem_alloc_page(&mem) == NULL);
+  
+  printf(" passed!\n");
 }

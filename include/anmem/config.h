@@ -31,6 +31,13 @@ bool anmem_configure(anmem_config_t * config,
                      uint64_t pageSkip);
 
 /**
+ * Call this after calling anmem_configure(). This will actually initialize
+ * the allocators which were reserved by anmem_configure().
+ * @return a `false` return means a fatal error.
+ */
+bool anmem_init_structures(anmem_t * mem);
+
+/**
  * Get the number of pages which are being used for linear, aligned
  * memory allocation. Ideally, but not always, this will be equal to 2^n
  * where n is the value you passed for `maxControllable` to anmem_configure.

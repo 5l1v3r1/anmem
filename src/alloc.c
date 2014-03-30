@@ -14,7 +14,7 @@ void * anmem_alloc_aligned(anmem_t * mem, uint64_t len) {
     
     anlock_lock(&mem->allocators[i].lock);
     analloc_t alloc = &mem->allocators[i].anallocRoot;
-    void * buff = analloc_alloc(alloc, &size, 1);
+    void * buff = analloc_alloc(alloc, &size, 0);
     anlock_unlock(&mem->allocators[i].lock);
     if (buff) return buff;
   }
@@ -57,7 +57,7 @@ void * anmem_alloc_page(anmem_t * mem) {
       anlock_lock(&mem->allocators[i].lock);
       analloc_t alloc = &mem->allocators[i].anallocRoot;
       uint64_t size = 0x1000;
-      void * buff = analloc_alloc(alloc, &size, 1);
+      void * buff = analloc_alloc(alloc, &size, 0);
       anlock_unlock(&mem->allocators[i].lock);
       if (buff) return buff;
     }

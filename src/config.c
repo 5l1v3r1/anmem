@@ -70,6 +70,28 @@ bool anmem_configure(anmem_config_t * config,
   return result && !hadToCut;
 }
 
+bool anmem_init_structures(anmem_t * mem) {
+  uint64_t i;
+  for (i = 0; i < mem->count; i++) {
+    uint64_t type = mem->allocators[i].type;
+    uint64_t start = mem->allocators[i].start;
+    uint64_t len = mem->allocators[i].len;
+    if (type == 0) { // anpages
+      anpages_t pages = &mem->allocators[i].anpagesRoot;
+      if (!anpages_initialize(pages, start, len)) {
+        return false;
+      }
+    } else if (type == 1) { // analloc
+      void * buffer = (void *)(start << 12);
+      analloc_t alloc = &mem->allocators[i].anallocRoot;
+      if (!analloc_with_chunk(alloc, buffer, len << 12, 0, 0x1000)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 uint64_t anmem_analloc_count(anmem_t * mem) {
   // count the size used by anallocators
   uint64_t i, pages = 0;
@@ -153,18 +175,6 @@ static bool _add_allocator(anmem_t * mem,
   mem->allocators[mem->count].type = type;
   mem->allocators[mem->count].start = start;
   mem->allocators[mem->count].len = len;
-  if (type == 0) { // anpages
-    anpages_t pages = &mem->allocators[mem->count].anpagesRoot;
-    if (!anpages_initialize(pages, start, len)) {
-      return false;
-    }
-  } else if (type == 1) { // analloc
-    void * buffer = (void *)(start << 12);
-    analloc_t alloc = &mem->allocators[mem->count].anallocRoot;
-    if (!analloc_with_chunk(alloc, buffer, len << 12, 0, 0x1000)) {
-      return false;
-    }
-  }
   mem->count++;
   return true;
 }
