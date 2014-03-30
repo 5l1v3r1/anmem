@@ -49,7 +49,7 @@ bool anmem_configure(anmem_config_t * config,
   } while (allocs + mem->count > mem->maximum);
   
   // go through and create the allocators
-  uint64_t startPage = 0;
+  uint64_t startPage = pageSkip;
   
   while (startPage + 1 < sum) {
     uint64_t len;
