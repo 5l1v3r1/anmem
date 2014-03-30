@@ -19,8 +19,8 @@ typedef struct {
   uint64_t lock;
   
   union {
-    anidxset_root_t * anpagesRoot;
-    analloc_t anallocRoot;
+    anpages_struct_t anpagesRoot;
+    analloc_struct_t anallocRoot;
   };
 } __attribute__((packed)) anmem_section_t;
 
@@ -30,8 +30,9 @@ typedef struct {
  * functions as needed.
  */
 typedef struct {
-  anmem_allocator_t * allocators;
+  anmem_section_t * allocators;
   uint64_t count;
+  uint64_t maximum;
 } __attribute__((packed)) anmem_t;
 
 /**

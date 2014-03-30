@@ -7,7 +7,7 @@
  * @param config Information about the physical memory's topology.
  *
  * @param mem The allocators array should point to a static fixed-size array.
- * The count field should be the MAXIMUM number of allocators that may be
+ * The maximum field should be the maximum number of allocators that may be
  * stored in the array. If more allocators than this are necessary, the
  * operation will fail and false will be returned.
  *
