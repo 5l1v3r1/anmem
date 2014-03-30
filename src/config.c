@@ -70,6 +70,17 @@ bool anmem_configure(anmem_config_t * config,
   return result && !hadToCut;
 }
 
+uint64_t anmem_analloc_count(anmem_t * mem) {
+  // count the size used by anallocators
+  uint64_t i, pages = 0;
+  for (i = 0; i < mem->count; i++) {
+    if (mem->allocators[i].type == 1) {
+      pages += mem->allocators[i].len;
+    }
+  }
+  return pages;
+}
+
 static bool _create_controllable(anmem_config_t * config,
                                  anmem_t * mem,
                                  uint64_t pagesExp,
