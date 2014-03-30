@@ -97,15 +97,17 @@ static bool _create_controllable(anmem_config_t * config,
       structs += config->structSize;
       // calculate the available bounds
       uint64_t lowerBound = curPage, upperBound = curPage + fullSize;
+#ifndef IGNORE_4GB_RULE
       if (upperBound > 0x100000) {
         upperBound = 0x100000;
       }
+#endif
       if (lowerBound < pageSkip) {
         lowerBound = pageSkip;
       }
+#ifndef IGNORE_4GB_RULE
       if (lowerBound >= 0x100000) break;
-      
-      printf("lowerBound = %llx, upperBound = %llx, pageSkip = %llx\n", lowerBound, upperBound, pageSkip);
+#endif
       
       curPage += fullSize;
       // while there are pages left to grab, grab available aligned regions
@@ -115,7 +117,8 @@ static bool _create_controllable(anmem_config_t * config,
         if (upperBound - lowerBound < grabSize) break;
         // look for an aligned address between lowerBound and upperBound
         if (lowerBound % grabSize) {
-          uint64_t nextBound = lowerBound + (lowerBound % grabSize);
+          uint64_t nextBound = lowerBound + grabSize
+            - (lowerBound % grabSize);
           if (nextBound + grabSize > upperBound) break;
           
           // we found a region for our grab size

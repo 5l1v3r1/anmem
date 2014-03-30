@@ -14,7 +14,7 @@ libs_build:
 	done
 
 ../build:
-	cd .. && make INCLUDES=-I./test/include
+	cd .. && make INCLUDES=-I./test/include CFLAGS=-DIGNORE_4GB_RULE=1
 
 build:
 	mkdir build
